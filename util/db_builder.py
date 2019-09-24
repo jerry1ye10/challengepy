@@ -139,6 +139,7 @@ def favorite(club_name, username):
     return "Club has been favorited!"
 
 def update_club(club_name, description, tags):
+    '''Updates a club inside the database'''
     db = sqlite3.connect(DB_FILE)
     c = db.cursor()
     tagString = ""
@@ -157,6 +158,7 @@ def update_club(club_name, description, tags):
     db.close()
 
 def add_event(username, event_name, event_description, location, time):
+    '''Adds an event to the database'''
     db = sqlite3.connect(DB_FILE)
     c = db.cursor()
     command = "INSERT INTO events (name,description, user, location, time )VALUES(?,?,?,?,?);"
@@ -165,6 +167,7 @@ def add_event(username, event_name, event_description, location, time):
     db.close()
 
 def find_events(username):
+    '''Gets events from the database for a specific user''' 
     db = sqlite3.connect(DB_FILE)
     c = db.cursor()
     command = "SELECT * FROM events WHERE user = ?;"

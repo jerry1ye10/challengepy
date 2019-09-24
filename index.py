@@ -34,7 +34,7 @@ users.append(user1)
 clubsData = []
 '''
 db.create_database() #Creates the data base
-def sourceClubData(): #Sources all of the club data into the list data structure
+def sourceClubData(): #Sources all of the club data into sqlite database
     html = get_clubs_html()
     soup = soupify(html)
     clubs = get_clubs(soup)
@@ -45,20 +45,23 @@ def sourceClubData(): #Sources all of the club data into the list data structure
         db.add_club(name,description,tags)
 
 sourceClubData()
-db.add_user('jen','Jennifer Doe', 'jen@pennlabs.org', 'password')
-db.add_user('jerry','jerry1ye10','je', 'das')
-#db.favorite("Arun Fan Club", 'jerry1ye10')
+db.add_user('jen','Jennifer Doe', 'jen@pennlabs.org', 'password') #Adds sample users as per project directions
+db.add_user('jerry','jerry1ye10','je', 'das') #Adds additional sample user for testing
+#db.favorite("Arun Fan Club", 'jerry1ye10') #previously used for testing
+
 @app.route('/')
 def main():
+    ''' This is the index route of the api which welcomes the user'''
     return "Welcome to Penn Club Review!"
 
 @app.route('/api')
 def api():
+    ''' This also welcomes the user to an api page '''
     return "Welcome to the Penn Club Review API!."
 
-#Ask in office hours if we can assume all parameters are met in the post request
 @app.route('/api/clubs', methods=['POST','GET'])
 def clubs():
+    '''This route responds to both GET and POST requests. It will return a json dataset of all of the clubs with a GET request. It will add/update a club in response to a POST request'''
     if (request.method == "GET"):
         returnList = []
         clubsData = db.get_club_data()
@@ -70,7 +73,7 @@ def clubs():
             dict['favoritedUsers'] = club[4]
             returnList.append(dict)
         return json.dumps(returnList)
-    elif (request.method == "POST"):
+    elif (request.method == "POST"): #POST request requires 4 parameters: update, name, description, and tags
         args = request.form
         print(args['update'])
         clubsData = db.get_club_data()
@@ -86,30 +89,31 @@ def clubs():
 
         return "Club has been added"
 
-
-
 @app.route('/api/user/<username>', methods=['GET'] )
 def user(username):
+    '''This route returns the user data of a single specified user'''
     users = db.get_user_data()
     for user in users:
         if user[2] == username:
             return json.dumps({'username': user[2],'name': user[1],'clubs': user[5],'email': user[3]})
 
-#Ask about return statements in these functions
+
 @app.route('/api/favorite', methods=['POST'])
 def favor():
-    #print(args)
+    '''This route takes a POST request and will have a user favorite a club. It requires a club name and a username as parameters'''
     db.favorite(request.form['club_name'], request.form['username'])
     return "Club has been favorited"
 
 @app.route('/api/event', methods=['POST'])
 def event():
+    '''This route is an additional feature added that allows the user to create a specific event through a POST request. It takes in 5 parameters: username, event name, event description, event location, and event time'''
     args = request.form
     db.add_event(request.form['username'],request.form['event_name'], args['event_description'], args['location'], args['time'])
     return "Event created!"
 
 @app.route('/api/event/<username>', methods=['GET'])
 def user_event(username):
+    '''This route allows a user to check his events using a GET request''' 
     events = db.find_events(username)
     returnList = []
     for event in events:
